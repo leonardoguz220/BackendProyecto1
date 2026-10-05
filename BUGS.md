@@ -12,6 +12,7 @@ Estados: corregido y verificado, corregido sin verificar, sospecha, pendiente.
 | BE-08 | auth | Login exige password de 12+ caracteres | corregido y verificado | fix(BE-08) |
 | BE-09 | auth | Login espera 5 s en cada intento | corregido y verificado | fix(BE-09) |
 | BE-02 | main | Swagger publicado en /api/doc | corregido y verificado | fix(BE-02) |
+| BE-04 | config | .env.example apunta Mongo al puerto 27018 | corregido y verificado | fix(BE-04) |
 
 ## Backend
 
@@ -81,6 +82,13 @@ Estados: corregido y verificado, corregido sin verificar, sospecha, pendiente.
 - Solución: `SwaggerModule.setup('api/docs', ...)`.
 - Cómo demostrarlo: `curl -o /dev/null -w '%{http_code}' http://localhost:3000/api/docs` → antes 404 (y /api/doc 200); después 200 (y /api/doc 404).
 - Commit: fix(BE-02)
+
+### BE-04 — MONGODB_URI de ejemplo con puerto equivocado
+- Dónde: .env.example:2 (MONGODB_URI)
+- Problema: El ejemplo usaba `localhost:27018`, pero docker-compose.yml publica Mongo en 27017; quien sigue el README (`cp .env.example .env`) no conecta a la base.
+- Solución: Usar `mongodb://localhost:27017/universidad?replicaSet=rs0&directConnection=true`.
+- Cómo demostrarlo: Script node que conecta con la URI de .env.example → antes `ECONNREFUSED 127.0.0.1:27018`; después `Mongo OK con localhost:27017`.
+- Commit: fix(BE-04)
 
 ## Base de datos
 
