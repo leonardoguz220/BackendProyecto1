@@ -21,6 +21,7 @@ Estados: corregido y verificado, corregido sin verificar, sospecha, pendiente.
 | BE-14 | users | Búsqueda q de usuarios distingue mayúsculas | corregido y verificado | fix(BE-14) |
 | BE-15 | users | Filtro active convierte cualquier texto en false | corregido y verificado | fix(BE-15) |
 | BE-16 | groups | GET /groups/mine capturado por GET /groups/:id | corregido y verificado | fix(BE-16) |
+| BE-17 | groups | assertCanManage no restringe a los docentes | corregido y verificado | fix(BE-17) |
 
 ## Backend
 
@@ -153,6 +154,13 @@ Estados: corregido y verificado, corregido sin verificar, sospecha, pendiente.
 - Solución: Mover el handler `mine` antes de `:id`.
 - Cómo demostrarlo: `GET /api/groups/mine` con token de laura.lopez89 (docente) → antes 400 `ID invalido`; después 200 con la paginación de sus grupos (0 en los datos actuales, coincide con Mongo). Con estudiante → 403.
 - Commit: fix(BE-16)
+
+### BE-17 — assertCanManage valida el rol equivocado
+- Dónde: src/groups/groups.service.ts (assertCanManage)
+- Problema: La condición era `user.role === Role.Estudiante`; los docentes nunca pasaban por la verificación de propiedad y podían gestionar (nómina, planilla, notas, evaluaciones) grupos que no son suyos.
+- Solución: `if (user.role === Role.Docente)`: el docente solo gestiona grupos cuyo `teacher` es su perfil; el admin gestiona todos.
+- Cómo demostrarlo: `GET /api/groups/6abf0b8bfead57fb41c12c37/roster` con token de laura.lopez89 (no es su grupo) → antes pasaba la verificación (terminaba en 500 por datos); después 403 `El grupo no esta a tu cargo`. Nota: con admin ese grupo da 500 porque su `subject` no existe en la colección actual (importación incompleta por DB-10).
+- Commit: fix(BE-17)
 
 ## Base de datos
 
