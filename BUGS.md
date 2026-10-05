@@ -13,6 +13,7 @@ Estados: corregido y verificado, corregido sin verificar, sospecha, pendiente.
 | BE-09 | auth | Login espera 5 s en cada intento | corregido y verificado | fix(BE-09) |
 | BE-02 | main | Swagger publicado en /api/doc | corregido y verificado | fix(BE-02) |
 | BE-04 | config | .env.example apunta Mongo al puerto 27018 | corregido y verificado | fix(BE-04) |
+| BE-05 | config | JWT_SECRET vacío en .env.example | corregido y verificado | fix(BE-05) |
 
 ## Backend
 
@@ -89,6 +90,13 @@ Estados: corregido y verificado, corregido sin verificar, sospecha, pendiente.
 - Solución: Usar `mongodb://localhost:27017/universidad?replicaSet=rs0&directConnection=true`.
 - Cómo demostrarlo: Script node que conecta con la URI de .env.example → antes `ECONNREFUSED 127.0.0.1:27018`; después `Mongo OK con localhost:27017`.
 - Commit: fix(BE-04)
+
+### BE-05 — JWT_SECRET de ejemplo vacío
+- Dónde: .env.example:5 (JWT_SECRET)
+- Problema: `JWT_SECRET=` vacío; validateEnv exige mínimo 16 caracteres, así que la API no arranca con el .env copiado del ejemplo.
+- Solución: Valor de ejemplo de 16+ caracteres (`cambia-este-secreto-de-ejemplo-123456`).
+- Cómo demostrarlo: Ejecutar `validateEnv` con los valores de .env.example → antes `JWT_SECRET must be longer than or equal to 16 characters`; después `validateEnv OK`.
+- Commit: fix(BE-05)
 
 ## Base de datos
 
