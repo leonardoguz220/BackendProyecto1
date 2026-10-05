@@ -10,6 +10,7 @@ Estados: corregido y verificado, corregido sin verificar, sospecha, pendiente.
 | BE-06 | auth | RolesGuard no registrado: @Roles no se aplica | corregido y verificado | fix(BE-06) |
 | BE-07 | auth | Token JWT vence en 3,6 s | corregido y verificado | fix(BE-07) |
 | BE-08 | auth | Login exige password de 12+ caracteres | corregido y verificado | fix(BE-08) |
+| BE-09 | auth | Login espera 5 s en cada intento | corregido y verificado | fix(BE-09) |
 
 ## Backend
 
@@ -65,6 +66,13 @@ Estados: corregido y verificado, corregido sin verificar, sospecha, pendiente.
 - Solución: Quitar `@MinLength(12)` (y su import) del LoginDto; la longitud se valida al crear/cambiar clave, no en el login.
 - Cómo demostrarlo: `POST /api/auth/login {admin@universidad.edu, Secret123!}` → antes 400 `password must be longer than or equal to 12 characters`; después 201 con accessToken (también docente y estudiante de prueba).
 - Commit: fix(BE-08)
+
+### BE-09 — slowDownAttempts retrasa todos los logins
+- Dónde: src/auth/auth.service.ts:18 (login) y método slowDownAttempts
+- Problema: `await this.slowDownAttempts()` hacía un setTimeout de 5000 ms en cada login, correcto o no; el frontend se colgaba 5 s por intento.
+- Solución: Quitar la llamada y el método.
+- Cómo demostrarlo: `time curl -X POST http://localhost:3000/api/auth/login ...` → antes ≥5 s (por código); después 0,85 s, HTTP 201.
+- Commit: fix(BE-09)
 
 ## Base de datos
 
