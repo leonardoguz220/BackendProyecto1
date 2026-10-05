@@ -694,7 +694,7 @@
             },
             "body": {
               "mode": "raw",
-              "raw": "{\n    \"user\": \"PEGA_AQUI_EL_ID_DEL_USUARIO_DOCENTE\",\n    \"code\": \"DOC-001\",\n    \"department\": \"Ingenieria\"\n}",
+              "raw": "{\n    \"user\": \"PEGA_AQUI_EL_ID_DEL_USUARIO_DOCENTE\",\n    \"code\": \"DOC-001\",\n    \"faculty\": \"PEGA_AQUI_EL_ID_DE_LA_FACULTAD\"\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -801,7 +801,7 @@
             },
             "body": {
               "mode": "raw",
-              "raw": "{\n    \"code\": \"DOC-001\",\n    \"department\": \"Matematicas\",\n    \"active\": true\n}",
+              "raw": "{\n    \"code\": \"DOC-001\",\n    \"faculty\": \"PEGA_AQUI_EL_ID_DE_LA_FACULTAD\",\n    \"active\": true\n}",
               "options": {
                 "raw": {
                   "language": "json"

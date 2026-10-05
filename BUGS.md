@@ -30,6 +30,7 @@ Estados: corregido y verificado, corregido sin verificar, sospecha, pendiente.
 | BE-23 | grades | Nota máxima validada en 4.5 (escala 0–5) | corregido y verificado | fix(BE-23) |
 | BE-24 | grades | Nota final 3.0 queda reprobada | corregido y verificado | fix(BE-24) |
 | BE-26 | notifications | Marcar como leída no cambia read | corregido y verificado | fix(BE-26) |
+| BE-27 | postman | Postman crea/edita docentes con campo department inexistente | corregido y verificado | fix(BE-27) |
 
 ## Backend
 
@@ -225,6 +226,13 @@ Estados: corregido y verificado, corregido sin verificar, sospecha, pendiente.
 - Solución: Agregar `notification.read = true;` antes de `readAt`.
 - Cómo demostrarlo: Estudiante juliana.herrera147: `PATCH /api/notifications/<id>/read` → antes 200 con `read:false` y `readAt` puesto (6ac3d753070dfa76b6f1f5f9); después 200 con `read:true` (6ac3d72db604514b766ae4a5). Con token de otro usuario → 403.
 - Commit: fix(BE-26)
+
+### BE-27 — Colección de Postman desalineada con CreateTeacherDto
+- Dónde: postman/proyecto1-simple.postman_collection.json (Teachers: POST /api/teachers y PATCH /api/teachers/:id)
+- Problema: Los cuerpos de ejemplo envían `department`, pero el DTO/esquema de docentes usa `faculty` (ObjectId requerido). Con `forbidNonWhitelisted` la petición de la colección siempre falla.
+- Solución: Cambiar `department` por `faculty: PEGA_AQUI_EL_ID_DE_LA_FACULTAD` en ambos cuerpos (igual que los demás placeholders de la colección).
+- Cómo demostrarlo: Usuario QA docente 6ac3d80e5593b9da19ca2c38: `POST /api/teachers {user, code: DOC-QA-1, department: Ingenieria}` (cuerpo antiguo) → 400 `property department should not exist`, `faculty must be a mongodb id`; con el cuerpo corregido y la facultad 6abf0b8bfead57fb41c12b01 → 201.
+- Commit: fix(BE-27)
 
 ## Base de datos
 
