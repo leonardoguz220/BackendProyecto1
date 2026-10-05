@@ -9,7 +9,6 @@ import { AuthService } from './auth.service';
 import { JwtAuthGuard } from './guards/jwt-auth.guard';
 import { RolesGuard } from './guards/roles.guard';
 import { JwtStrategy } from './strategies/jwt.strategy';
-import type { StringValue } from 'ms';
 
 @Module({
   imports: [
@@ -20,7 +19,7 @@ import type { StringValue } from 'ms';
       inject: [ConfigService],
       useFactory: (config: ConfigService) => ({
         secret: config.getOrThrow<string>('JWT_SECRET'),
-        signOptions: { expiresIn: String(config.getOrThrow<number>('JWT_EXPIRES_IN_SECONDS')) as StringValue },
+        signOptions: { expiresIn: Number(config.getOrThrow('JWT_EXPIRES_IN_SECONDS')) },
 
 
       }),

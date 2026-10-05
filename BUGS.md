@@ -8,6 +8,7 @@ Estados: corregido y verificado, corregido sin verificar, sospecha, pendiente.
 | BE-01 | main | Prefijo global api/v1 en vez de api | corregido y verificado | fix(BE-01) |
 | BE-03 | main | Puerto leído de APP_PORT con default 3001 | corregido y verificado | fix(BE-03) |
 | BE-06 | auth | RolesGuard no registrado: @Roles no se aplica | corregido y verificado | fix(BE-06) |
+| BE-07 | auth | Token JWT vence en 3,6 s | corregido y verificado | fix(BE-07) |
 
 ## Backend
 
@@ -47,6 +48,13 @@ Estados: corregido y verificado, corregido sin verificar, sospecha, pendiente.
 - Solución: Importar RolesGuard y agregar `{ provide: APP_GUARD, useClass: RolesGuard }` después del de JWT.
 - Cómo demostrarlo: Token de juliana.herrera147 (estudiante): `GET /api/users` → antes 200 con la lista de usuarios; después 403 `No tienes permisos para esta accion`. Admin sigue con 200.
 - Commit: fix(BE-06)
+
+### BE-07 — expiresIn del JWT interpretado como milisegundos
+- Dónde: src/auth/auth.module.ts:22 (signOptions.expiresIn)
+- Problema: `expiresIn: String(JWT_EXPIRES_IN_SECONDS) as StringValue`: la cadena "3600" sin unidad se interpreta como 3600 ms, el token expiraba a los 3,6 s.
+- Solución: `expiresIn: Number(config.getOrThrow('JWT_EXPIRES_IN_SECONDS'))` (segundos) y quitar el import de `ms`.
+- Cómo demostrarlo: Decodificar el payload del token de login → después `exp - iat = 3600`; `GET /api/users` con el token 5 s después del login → 200 (antes 401).
+- Commit: fix(BE-07)
 
 ## Base de datos
 
