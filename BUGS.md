@@ -28,6 +28,7 @@ Estados: corregido y verificado, corregido sin verificar, sospecha, pendiente.
 | BE-21 | evaluations | Controlador montado en /evaluationslalala | corregido y verificado | fix(BE-21) |
 | BE-22 | evaluations | POST /evaluations responde 400 aunque crea | corregido y verificado | fix(BE-22) |
 | BE-23 | grades | Nota máxima validada en 4.5 (escala 0–5) | corregido y verificado | fix(BE-23) |
+| BE-24 | grades | Nota final 3.0 queda reprobada | corregido y verificado | fix(BE-24) |
 
 ## Backend
 
@@ -209,6 +210,13 @@ Estados: corregido y verificado, corregido sin verificar, sospecha, pendiente.
 - Solución: `@Max(5)`.
 - Cómo demostrarlo: Docente Laura, matrícula QA 6ac3d6922470a6c9903e0e0f, evaluación QA Parcial 1: `PUT /api/grades {value: 4.8}` → antes 400 `value must not be greater than 4.5`; después 200. Con `value: 5.1` → 400 `must not be greater than 5`.
 - Commit: fix(BE-23)
+
+### BE-24 — Comparación estricta con PASSING_GRADE
+- Dónde: src/grades/grades.service.ts:132 (finalize)
+- Problema: `finalGrade > PASSING_GRADE` (3.0): un estudiante con exactamente 3.0 quedaba `reprobada`, cuando la nota mínima aprobatoria es 3.0.
+- Solución: `finalGrade >= PASSING_GRADE`.
+- Cómo demostrarlo: Grupo QA 6ac3d68d2470a6c9903e0dfe con evaluaciones 40/40/20 y nota 3 en todas. `POST /api/grades/finalize/<matrícula>` (docente Laura) → antes matrícula 6ac3d6922470a6c9903e0e0f: `finalGrade 3, status reprobada`; después matrícula 6ac3d75e070dfa76b6f1f611: `finalGrade 3, status aprobada`.
+- Commit: fix(BE-24)
 
 ## Base de datos
 
