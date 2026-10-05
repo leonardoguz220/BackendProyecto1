@@ -16,6 +16,7 @@ Estados: corregido y verificado, corregido sin verificar, sospecha, pendiente.
 | BE-05 | config | JWT_SECRET vacío en .env.example | corregido y verificado | fix(BE-05) |
 | BE-10 | users | POST /users responde 400 aunque crea el usuario | corregido y verificado | fix(BE-10) |
 | BE-11 | users | GET /users/me capturado por GET /users/:id | corregido y verificado | fix(BE-11) |
+| BE-12 | users | UpdateUserDto usa el campo namesssss | corregido y verificado | fix(BE-12) |
 
 ## Backend
 
@@ -113,6 +114,13 @@ Estados: corregido y verificado, corregido sin verificar, sospecha, pendiente.
 - Solución: Mover el handler `me` antes de `:id`.
 - Cómo demostrarlo: `GET /api/users/me` → antes admin 400 `ID invalido`, estudiante 403; después 200 con el perfil propio para admin, docente y estudiante. `GET /api/users/<id>` (admin) sigue 200.
 - Commit: fix(BE-11)
+
+### BE-12 — Campo mal escrito en UpdateUserDto
+- Dónde: src/users/dto/user.dto.ts:14 (UpdateUserDto)
+- Problema: El campo se llamaba `namesssss`; con `forbidNonWhitelisted` enviar `name` daba 400 y el admin no podía renombrar usuarios.
+- Solución: Renombrar el campo a `name`.
+- Cómo demostrarlo: `PATCH /api/users/6ac3d540c095e150a27de5a4` (admin) `{"name":"QA Prueba Diez Editado"}` → antes 400 `property name should not exist`; después 200 con el nombre actualizado.
+- Commit: fix(BE-12)
 
 ## Base de datos
 
