@@ -26,6 +26,7 @@ Estados: corregido y verificado, corregido sin verificar, sospecha, pendiente.
 | BE-19 | enrollments | Matricular responde 400 aunque la matrícula queda activa | corregido y verificado | fix(BE-19) |
 | BE-20 | enrollments | Cancelar matrícula no libera el cupo | corregido y verificado | fix(BE-20) |
 | BE-21 | evaluations | Controlador montado en /evaluationslalala | corregido y verificado | fix(BE-21) |
+| BE-22 | evaluations | POST /evaluations responde 400 aunque crea | corregido y verificado | fix(BE-22) |
 
 ## Backend
 
@@ -193,6 +194,13 @@ Estados: corregido y verificado, corregido sin verificar, sospecha, pendiente.
 - Solución: `@Controller('evaluations')`.
 - Cómo demostrarlo: `GET /api/evaluations?limit=1` (admin) → antes 404 (y /api/evaluationslalala 200); después 200 con total 100.
 - Commit: fix(BE-21)
+
+### BE-22 — @HttpCode(BAD_REQUEST) en crear evaluación
+- Dónde: src/evaluations/evaluations.controller.ts:21 (create)
+- Problema: `@HttpCode(HttpStatus.BAD_REQUEST)` forzaba 400 en una creación exitosa: la evaluación se guardaba pero el cliente lo trataba como error (y podía reintentar duplicándola).
+- Solución: Quitar el decorador (y los imports que quedaron sin uso); el POST responde 201.
+- Cómo demostrarlo: Docente laura.lopez89 en su grupo QA 6ac3d68d2470a6c9903e0dfe: `POST /api/evaluations {group, name: QA Parcial 1, weight: 40}` → antes 400 con la evaluación creada en el cuerpo; después 201 (`QA Parcial 2`). Estudiante → 403.
+- Commit: fix(BE-22)
 
 ## Base de datos
 
