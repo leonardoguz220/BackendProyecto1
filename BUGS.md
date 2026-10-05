@@ -9,8 +9,11 @@ Estados: corregido y verificado, corregido sin verificar, sospecha, pendiente.
 | BE-03 | main | Puerto leído de APP_PORT con default 3001 | corregido y verificado | fix(BE-03) |
 | BE-06 | auth | RolesGuard no registrado: @Roles no se aplica | corregido y verificado | fix(BE-06) |
 | BE-07 | auth | Token JWT vence en 3,6 s | corregido y verificado | fix(BE-07) |
+| BE-08 | auth | Login exige password de 12+ caracteres | corregido y verificado | fix(BE-08) |
 
 ## Backend
+
+> Nota: BE-25, BE-01, BE-03, BE-06, BE-07, BE-08 y BE-09 impedían arrancar la API o hacer login, así que se corrigieron juntos; su resultado "antes" se deduce del código y el "después" se verificó con curl contra http://localhost:3000/api.
 
 <!--
 ### BE-01 — Título corto
@@ -55,6 +58,13 @@ Estados: corregido y verificado, corregido sin verificar, sospecha, pendiente.
 - Solución: `expiresIn: Number(config.getOrThrow('JWT_EXPIRES_IN_SECONDS'))` (segundos) y quitar el import de `ms`.
 - Cómo demostrarlo: Decodificar el payload del token de login → después `exp - iat = 3600`; `GET /api/users` con el token 5 s después del login → 200 (antes 401).
 - Commit: fix(BE-07)
+
+### BE-08 — @MinLength(12) en LoginDto
+- Dónde: src/auth/dto/login.dto.ts:12 (password)
+- Problema: `@MinLength(12)` rechazaba con 400 la clave de prueba `Secret123!` (10 caracteres) del README, nadie podía iniciar sesión.
+- Solución: Quitar `@MinLength(12)` (y su import) del LoginDto; la longitud se valida al crear/cambiar clave, no en el login.
+- Cómo demostrarlo: `POST /api/auth/login {admin@universidad.edu, Secret123!}` → antes 400 `password must be longer than or equal to 12 characters`; después 201 con accessToken (también docente y estudiante de prueba).
+- Commit: fix(BE-08)
 
 ## Base de datos
 
