@@ -15,6 +15,7 @@ Estados: corregido y verificado, corregido sin verificar, sospecha, pendiente.
 | BE-04 | config | .env.example apunta Mongo al puerto 27018 | corregido y verificado | fix(BE-04) |
 | BE-05 | config | JWT_SECRET vacío en .env.example | corregido y verificado | fix(BE-05) |
 | BE-10 | users | POST /users responde 400 aunque crea el usuario | corregido y verificado | fix(BE-10) |
+| BE-11 | users | GET /users/me capturado por GET /users/:id | corregido y verificado | fix(BE-11) |
 
 ## Backend
 
@@ -105,6 +106,13 @@ Estados: corregido y verificado, corregido sin verificar, sospecha, pendiente.
 - Solución: Quitar `@HttpCode(400)` (Nest devuelve 201 en POST).
 - Cómo demostrarlo: `POST /api/users` (admin) con `{name, email: qa.be10@..., password: Secret123!, role: estudiante}` → antes HTTP 400 con el usuario creado en el cuerpo; después HTTP 201 (qa.be10b@...).
 - Commit: fix(BE-10)
+
+### BE-11 — Orden de rutas: ':id' antes de 'me'
+- Dónde: src/users/users.controller.ts (findOne / me)
+- Problema: `@Get(':id')` estaba declarado antes de `@Get('me')`, así que `/users/me` entraba en findOne: el admin recibía 400 `ID invalido` y docente/estudiante 403 (findOne solo es de admin).
+- Solución: Mover el handler `me` antes de `:id`.
+- Cómo demostrarlo: `GET /api/users/me` → antes admin 400 `ID invalido`, estudiante 403; después 200 con el perfil propio para admin, docente y estudiante. `GET /api/users/<id>` (admin) sigue 200.
+- Commit: fix(BE-11)
 
 ## Base de datos
 
