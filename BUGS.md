@@ -24,6 +24,7 @@ Estados: corregido y verificado, corregido sin verificar, sospecha, pendiente.
 | BE-17 | groups | assertCanManage no restringe a los docentes | corregido y verificado | fix(BE-17) |
 | BE-18 | enrollments | GET /enrollments/mine solo para docentes | corregido y verificado | fix(BE-18) |
 | BE-19 | enrollments | Matricular responde 400 aunque la matrícula queda activa | corregido y verificado | fix(BE-19) |
+| BE-20 | enrollments | Cancelar matrícula no libera el cupo | corregido y verificado | fix(BE-20) |
 
 ## Backend
 
@@ -177,6 +178,13 @@ Estados: corregido y verificado, corregido sin verificar, sospecha, pendiente.
 - Solución: Invertir la condición: `if (created.status !== EnrollmentStatus.Active) throw`.
 - Cómo demostrarlo: Datos QA creados por API: periodo QA-2099-1 (abierto) y grupo 6ac3d68d2470a6c9903e0dfe (MAT101, docente Laura). `POST /api/enrollments {groupId}` con juliana.herrera147 → antes 400 `No se pudo confirmar la matricula` pero en Mongo la matrícula quedó `activa` y `enrolled` 1; después 201 con `status: activa`.
 - Commit: fix(BE-19)
+
+### BE-20 — cancel no decrementa group.enrolled
+- Dónde: src/enrollments/enrollments.service.ts (cancel, transacción)
+- Problema: Al cancelar solo se cambiaba `status` a `cancelada`; `groups.enrolled` no se decrementaba, el cupo quedaba ocupado para siempre y el grupo se llenaba con matrículas canceladas.
+- Solución: Dentro de la misma transacción: `await this.groupModel.updateOne({ _id: enrollment.group }, { $inc: { enrolled: -1 } }, { session });`.
+- Cómo demostrarlo: Grupo QA 6ac3d68d2470a6c9903e0dfe, matrícula 6ac3d6922470a6c9903e0e0f de juliana.herrera147: `POST /api/enrollments/<id>/cancel` → antes status `cancelada` y `enrolled` seguía en 1; después status `cancelada` y `enrolled` pasó de 2 a 1 (`GET /api/groups/<id>`).
+- Commit: fix(BE-20)
 
 ## Base de datos
 
