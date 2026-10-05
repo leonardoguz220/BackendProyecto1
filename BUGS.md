@@ -20,6 +20,7 @@ Estados: corregido y verificado, corregido sin verificar, sospecha, pendiente.
 | BE-13 | users | Cambiar contraseña no guarda la nueva clave | corregido y verificado | fix(BE-13) |
 | BE-14 | users | Búsqueda q de usuarios distingue mayúsculas | corregido y verificado | fix(BE-14) |
 | BE-15 | users | Filtro active convierte cualquier texto en false | corregido y verificado | fix(BE-15) |
+| BE-16 | groups | GET /groups/mine capturado por GET /groups/:id | corregido y verificado | fix(BE-16) |
 
 ## Backend
 
@@ -145,6 +146,13 @@ Estados: corregido y verificado, corregido sin verificar, sospecha, pendiente.
 - Solución: `@Transform(toBoolean)` importado de common/dto/query-helpers.
 - Cómo demostrarlo: `GET /api/users?active=abc` (admin) → antes 200 con usuarios inactivos; después 400 `active must be a boolean value`. `active=true` y `active=false` siguen filtrando bien (200).
 - Commit: fix(BE-15)
+
+### BE-16 — Orden de rutas: ':id' antes de 'mine' en grupos
+- Dónde: src/groups/groups.controller.ts (findOne / mine)
+- Problema: `@Get(':id')` estaba antes de `@Get('mine')` (pese al comentario), así que `/groups/mine` caía en findOne y el ParseObjectIdPipe respondía 400.
+- Solución: Mover el handler `mine` antes de `:id`.
+- Cómo demostrarlo: `GET /api/groups/mine` con token de laura.lopez89 (docente) → antes 400 `ID invalido`; después 200 con la paginación de sus grupos (0 en los datos actuales, coincide con Mongo). Con estudiante → 403.
+- Commit: fix(BE-16)
 
 ## Base de datos
 
