@@ -1,0 +1,137 @@
+users=201  programs=101  subjects=100  periods=100  students=100  teachers=100  faculties=10  classrooms=100  groups=100  enrollments=110  evaluations=100  grades=320  notifications=100
+
+[1] users :: texto vacio
+    6abf0b8bfead57fb41c12a38  name
+
+[1] programs :: indice unico violado
+    6ac03d4229a649e6df069ebb  code=dere (igual que 6abf0b8bfead57fb41c1292d)
+
+[1] students :: referencia rota
+    6abf0b8bfead57fb41c12b9c  program -> programs 6ac057b232f78f9b9e14f3c4
+
+[1] faculties :: espacios sobrantes
+    6abf0b8bfead57fb41c12b02  campus="Bogotá "
+
+[1] faculties :: referencia rota
+    6abf0b8bfead57fb41c12b0a  dean -> teachers 6ac057b232f78f9b9e14f3c3
+
+[1] enrollments :: indice unico violado
+    6ac057b232f78f9b9e14f3c2  student+group=6abf0b8bfead57fb41c12b9c|6abf0b8bfead57fb41c12c3e (igual que 6abf0b8bfead57fb41c12dfb)
+
+[47] grades :: timestamps
+    6abf0b8bfead57fb41c12dd8  createdAt posterior a updatedAt
+    6abf0b8bfead57fb41c12ddb  createdAt posterior a updatedAt
+    6abf0b8bfead57fb41c12dde  createdAt posterior a updatedAt
+    6abf0b8bfead57fb41c12de1  createdAt posterior a updatedAt
+    6abf0b8bfead57fb41c12de3  createdAt posterior a updatedAt
+    6abf0b8bfead57fb41c12de9  createdAt posterior a updatedAt
+    6abf0b8bfead57fb41c12dea  createdAt posterior a updatedAt
+    6abf0b8bfead57fb41c12df0  createdAt posterior a updatedAt
+    ... y 39 mas
+
+[1] notifications :: timestamps
+    6abf0b8bfead57fb41c12ec0  createdAt=ayer updatedAt=Thu Oct 01 2026 21:40:27 GMT-0400 (hora de Bolivia)
+
+[1] users :: enum
+    6abf0b8bfead57fb41c12a90  role=Docente
+
+[1] users :: email invalido
+    6abf0b8bfead57fb41c12a90  Laura.Lopez89@universidad.edu
+
+[1] users :: passwordHash invalido
+    6abf0b8bfead57fb41c12aca  $2b$10$8yzWo
+
+[1] students :: active distinto al del usuario
+    6abf0b8bfead57fb41c12b9c  perfil=false usuario=true (juliana.herrera147@universidad.edu)
+
+[1] teachers :: rol del usuario
+    6abf0b8bfead57fb41c12b62  usuario Laura.Lopez89@universidad.edu tiene rol Docente
+
+[1] teachers :: active distinto al del usuario
+    6abf0b8bfead57fb41c12b62  perfil=true usuario=false (Laura.Lopez89@universidad.edu)
+
+[1] subjects :: prerrequisito de si misma
+    6abf0b8bfead57fb41c12970  MAT101
+
+[1] subjects :: rango
+    6abf0b8bfead57fb41c1299d  credits=0
+
+[1] subjects :: ciclo de prerrequisitos
+    6abf0b8bfead57fb41c12970  MAT101
+
+[1] periods :: enum
+    6abf0b8bfead57fb41c12a35  status=Abierto
+
+[2] groups :: sobrecupo
+    6abf0b8bfead57fb41c12c3a  enrolled=35 capacity=32
+    6abf0b8bfead57fb41c12c3e  enrolled=42 capacity=39
+
+[2] groups :: contador enrolled inconsistente
+    6abf0b8bfead57fb41c12c3a  enrolled=35, matriculas no canceladas=9
+    6abf0b8bfead57fb41c12c3e  enrolled=42, matriculas no canceladas=10
+
+[1] groups :: enum
+    6abf0b8bfead57fb41c12c3a  schedule[0].day=Miércoles
+
+[2] groups :: salon inactivo
+    6abf0b8bfead57fb41c12c3a  B-104
+    6abf0b8bfead57fb41c12c99  B-104
+
+[2] groups :: cupo mayor que el salon
+    6abf0b8bfead57fb41c12c3a  capacity=32 salon B-104=22
+    6abf0b8bfead57fb41c12c99  capacity=25 salon B-104=22
+
+[1] groups :: hora de inicio no es anterior a la de fin
+    6abf0b8bfead57fb41c12c64  schedule[0] 09:00-07:00
+
+[1] evaluations :: porcentajes del grupo no suman 100
+    6abf0b8bfead57fb41c12dd2  grupo 6abf0b8bfead57fb41c12c3a: Parcial 1=25, Parcial 2=25, Taller=30, Examen final=30 (suma 110)
+
+[1] enrollments :: nota final en matricula no finalizada
+    6abf0b8bfead57fb41c12d25  activa finalGrade=3.38
+
+[2] enrollments :: matricula activa en periodo cerrado
+    6abf0b8bfead57fb41c12d25  2025-1
+    6abf0b8bfead57fb41c12e1a  2026-1
+
+[4] enrollments :: matricula activa de estudiante inactivo
+    6abf0b8bfead57fb41c12d25  E20210046
+    6abf0b8bfead57fb41c12dfb  E20210046
+    6abf0b8bfead57fb41c12e1a  E20210046
+    6ac057b232f78f9b9e14f3c2  E20210046
+
+[1] enrollments :: materia distinta a la del grupo
+    6abf0b8bfead57fb41c12dfb  enrollment.subject=6abf0b8bfead57fb41c129c0 group.subject=6abf0b8bfead57fb41c1299d
+
+[1] enrollments :: periodo distinto al del grupo
+    6abf0b8bfead57fb41c12e1a  enrollment.period=6abf0b8bfead57fb41c12a34 group.period=6abf0b8bfead57fb41c12a35
+
+[1] enrollments :: matricula creada despues de iniciar el periodo
+    6abf0b8bfead57fb41c12e1a  2026-1 createdAt=2026-08-02
+
+[1] enrollments :: cruce de horario del estudiante
+    6ac057b232f78f9b9e14f3c2  con matricula 6abf0b8bfead57fb41c12dfb
+
+[19] enrollments :: prerrequisito no aprobado
+    6abf0b8bfead57fb41c12da5  MAT101 requiere MAT101
+    6abf0b8bfead57fb41c12daa  MAT101 requiere MAT101
+    6abf0b8bfead57fb41c12daf  MAT101 requiere MAT101
+    6abf0b8bfead57fb41c12db4  MAT101 requiere MAT101
+    6abf0b8bfead57fb41c12db9  MAT101 requiere MAT101
+    6abf0b8bfead57fb41c12dbe  MAT101 requiere MAT101
+    6abf0b8bfead57fb41c12dc3  MAT101 requiere MAT101
+    6abf0b8bfead57fb41c12dc8  MAT101 requiere MAT101
+    ... y 11 mas
+
+[3] grades :: rango
+    6abf0b8bfead57fb41c12df0  value=5.7
+    6abf0b8bfead57fb41c12dfc  value=5.7
+    6abf0b8bfead57fb41c12e1b  value="4,2"
+
+[1] grades :: evaluacion de otro grupo
+    6abf0b8bfead57fb41c12dfd  matricula del grupo 6abf0b8bfead57fb41c12c3e, evaluacion del grupo 6abf0b8bfead57fb41c12c73
+
+[1] notifications :: enum
+    6abf0b8bfead57fb41c12eb7  type=aviso_urgente
+
+110 problemas en 36 reglas.
