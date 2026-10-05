@@ -250,6 +250,11 @@ Estados: corregido y verificado, corregido sin verificar, sospecha, pendiente.
 - Cómo demostrarlo: `POST /api/auth/login {admin@universidad.edu, Admin12345}` (ejemplo anterior) → 401 `Credenciales invalidas`. Después, `GET /api/docs-json` muestra `LoginDto.password.example = Secret123!` y ese cuerpo da 200.
 - Commit: fix(BE-29)
 
+### Sospechas y observaciones (sin cambio de código)
+- **Periodo abierto puede volver a planificado**: `PATCH /api/periods/:id {"status":"planificado"}` sobre un periodo `abierto` responde 200 (probado con el periodo QA 6ac3d6872470a6c9903e0dee). El comentario de `periods.service.ts` (update) dice que el ciclo es planificado → abierto → cerrado, pero no hay requisito explícito que prohíba retroceder. Estado: sospecha.
+- **`POST /api/enrollments/:id/cancel` responde 201**: las demás acciones POST que no crean recursos (`/periods/:id/close`, `/grades/finalize/:id`, `/groups/:id/finalize`, `/users/:id/reset-password`) usan `@HttpCode(200)`. Sin requisito explícito. Estado: sospecha.
+- **Entorno**: `npm run db:import` se detiene en `programs` por el código duplicado `DERE` (DB-10, base de datos). Las colecciones `students`, `subjects`, `teachers` y `users` quedan de una carga anterior y no coinciden con `groups`/`programs`; por eso `/students/:id/progress`, `/students/:id/history` y el roster de grupos del seed dan 500 (populate nulo). Las pruebas de BE-17 a BE-24 usaron datos QA creados por la API.
+
 ## Base de datos
 
 ## Frontend
