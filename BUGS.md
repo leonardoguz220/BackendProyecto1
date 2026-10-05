@@ -33,6 +33,36 @@ Estados: corregido y verificado, corregido sin verificar, sospecha, pendiente.
 | BE-27 | postman | Postman crea/edita docentes con campo department inexistente | corregido y verificado | fix(BE-27) |
 | BE-28 | notifications | Filtro read convierte cualquier texto en false | corregido y verificado | fix(BE-28) |
 | BE-29 | swagger/auth | Ejemplo de Swagger del login con clave inválida | corregido y verificado | fix(BE-29) |
+| DB-01 | users | Email de Laura López con mayúsculas | corregido y verificado | f1eccbb |
+| DB-02 | users | Rol de Laura López fuera del enum | corregido y verificado | f1eccbb |
+| DB-03 | users | Laura López inactiva | corregido y verificado | f1eccbb |
+| DB-04 | users | passwordHash truncado en Juliana Herrera | corregido y verificado | f1eccbb |
+| DB-05 | users | Administrador sin nombre | corregido y verificado | f1eccbb |
+| DB-06 | periods | Estado del periodo 2026-2 fuera del enum | corregido y verificado | f1eccbb |
+| DB-07 | students | Juliana apunta a un programa inexistente | corregido y verificado | f1eccbb |
+| DB-08 | faculties | Decano inexistente en FAC-COM | corregido y verificado | f1eccbb |
+| DB-09 | faculties | Sede de FAC-SAL con espacio final | corregido y verificado | f1eccbb |
+| DB-10 | programs | Programa extra con código DERE repetido | corregido y verificado | f1eccbb |
+| DB-11 | subjects | ODON105 con 0 créditos | corregido y verificado | f1eccbb |
+| DB-12 | subjects | MAT101 es prerrequisito de sí misma | corregido y verificado | f1eccbb |
+| DB-13 | enrollments | Matrícula duplicada de Juliana | corregido y verificado | f1eccbb |
+| DB-14 | enrollments | Materia y periodo distintos a los del grupo | corregido y verificado | f1eccbb |
+| DB-15 | enrollments | Matrícula activa con nota final en periodo cerrado | corregido y verificado | f1eccbb |
+| DB-16 | groups | Inscritos por encima del cupo en MAT101 g1 | corregido y verificado | f1eccbb |
+| DB-17 | groups | Inscritos por encima del cupo en ODON105 g1 | corregido y verificado | f1eccbb |
+| DB-18 | groups | Día del horario fuera del enum | corregido y verificado | f1eccbb |
+| DB-19 | groups | Franja que termina antes de empezar | corregido y verificado | f1eccbb |
+| DB-20 | evaluations | Porcentajes del grupo suman 110 | corregido y verificado | f1eccbb |
+| DB-21 | grades | Notas de 5.7 fuera de la escala | corregido y verificado | f1eccbb |
+| DB-22 | grades | Nota guardada como texto con coma | corregido y verificado | f1eccbb |
+| DB-23 | grades | Nota ligada a una evaluación de otro grupo | corregido y verificado | f1eccbb |
+| DB-24 | notifications | Tipo de notificación fuera del enum | corregido y verificado | f1eccbb |
+| DB-25 | notifications | createdAt guardado como texto | corregido y verificado | f1eccbb |
+| DB-26 | students | Perfil de estudiante de Juliana inactivo | corregido y verificado | f1eccbb |
+| DB-27 | classrooms | Salón B-104 marcado inactivo | corregido y verificado | f1eccbb |
+| DB-28 | groups | MAT101 g1 movido a un salón más pequeño que su cupo | corregido y verificado | f1eccbb |
+| DB-29 | groups | Grupo 2c99 movido a B-104 y en choque de salón | corregido y verificado | f1eccbb |
+| DB-30 | grades | Dos notas alteradas de 3.4 a 3 | corregido y verificado | f1eccbb |
 
 ## Backend
 
@@ -256,5 +286,217 @@ Estados: corregido y verificado, corregido sin verificar, sospecha, pendiente.
 - **Entorno**: durante la corrección, `npm run db:import` se detenía en `programs` (DB-10) y varios endpoints daban 500 por datos desalineados; BE-17 a BE-24 se probaron con datos QA creados por la API. Tras integrar los arreglos de base de datos (commit f1eccbb) la importación es completa: progress, history, roster y grade-sheet responden 200, y BE-17 se re-verificó con datos reales (Laura en el grupo ajeno 6abf0b8bfead57fb41c12c37 → 403).
 
 ## Base de datos
+
+> Nota: los 30 bugs de datos se corrigieron juntos en el commit f1eccbb, porque DB-10 impedía completar `npm run db:import`. Los valores corregidos salen de regenerar los datos con `scripts/db-seed.js` (determinista) y compararlos campo a campo. Verificación global: `node scripts/db-audit.js` → antes 63 avisos reales, después `Sin problemas de integridad` (salidas en `evidencias/`); `npm run db:import` importa las 13 colecciones; login 200 de los tres usuarios de prueba. Los `_id` abreviados como `…xxxx` llevan el prefijo `6abf0b8bfead57fb41c1`. La configuración de Mongo en `.env.example` está registrada como BE-04 y BE-05.
+
+### DB-01 — Email con mayúsculas
+- Dónde: database/users.json, usuario Laura López (`…2a90`), campo `email`
+- Problema: El email estaba como `Laura.Lopez89@universidad.edu`. El esquema guarda los emails en minúsculas y el login busca en minúsculas, así que la docente de prueba no se encuentra.
+- Solución: `laura.lopez89@universidad.edu`.
+- Cómo demostrarlo: `db.users.findOne({email: "laura.lopez89@universidad.edu"})` → antes: null; después: devuelve el usuario. Login de Laura → 200.
+- Commit: f1eccbb
+
+### DB-02 — Rol fuera del enum
+- Dónde: database/users.json, usuario Laura López (`…2a90`), campo `role`
+- Problema: Valor `Docente`; el enum `Role` solo admite `admin`, `docente`, `estudiante`. Los guards de rol no la reconocen como docente.
+- Solución: `docente`.
+- Cómo demostrarlo: `db.users.findOne({_id: ObjectId("6abf0b8bfead57fb41c12a90")})` → antes: `role: "Docente"`; después: `role: "docente"`.
+- Commit: f1eccbb
+
+### DB-03 — Usuario de prueba inactivo
+- Dónde: database/users.json, usuario Laura López (`…2a90`), campo `active`
+- Problema: `active: false` en un usuario de prueba del README, mientras su perfil en `teachers` (DOC-088) está activo. El login la rechaza como usuario inactivo.
+- Solución: `active: true` (valor original del seed).
+- Cómo demostrarlo: Login de Laura → antes: 401; después: 200. `db.users.findOne(...).active` → true.
+- Commit: f1eccbb
+
+### DB-04 — Hash de contraseña truncado
+- Dónde: database/users.json, usuario Juliana Herrera (`…2aca`), campo `passwordHash`
+- Problema: El hash tenía 59 caracteres en vez de 60 (bcrypt inválido): la estudiante de prueba no puede iniciar sesión. El hallazgo inicial apuntaba a Laura, pero el hash distinto era el de Juliana.
+- Solución: Copiar el hash común de los otros 200 usuarios (misma clave documentada).
+- Cómo demostrarlo: Login de Juliana → antes: 401; después: 200. `node scripts/db-audit.js` → antes: `users :: passwordHash invalido`.
+- Commit: f1eccbb
+
+### DB-05 — Nombre vacío
+- Dónde: database/users.json, usuario `admin@universidad.edu` (`…2a38`), campo `name`
+- Problema: `name: ""`; el campo es requerido y el README lo llama "Administrador".
+- Solución: `Administrador`.
+- Cómo demostrarlo: `db.users.findOne({email: "admin@universidad.edu"})` → antes: `name: ""`; después: `name: "Administrador"`.
+- Commit: f1eccbb
+
+### DB-06 — Estado fuera del enum
+- Dónde: database/periods.json, periodo `2026-2` (`…2a35`), campo `status`
+- Problema: Valor `Abierto`; el enum es `planificado`, `abierto`, `cerrado`. No existía ningún periodo abierto, así que no se podía matricular.
+- Solución: `abierto`.
+- Cómo demostrarlo: `db.periods.countDocuments({status: "abierto"})` → antes: 0; después: 1.
+- Commit: f1eccbb
+
+### DB-07 — Referencia rota a programa
+- Dónde: database/students.json, estudiante `E20210046` (`…2b9c`), campo `program`
+- Problema: `program` apuntaba a `6ac057b232f78f9b9e14f3c4`, que no existe en `programs`.
+- Solución: Programa original según el seed: Derecho, `DERE` (`…292d`).
+- Cómo demostrarlo: `db.programs.findOne({_id: db.students.findOne({code: "E20210046"}).program})` → antes: null; después: Derecho.
+- Commit: f1eccbb
+
+### DB-08 — Referencia rota a decano
+- Dónde: database/faculties.json, facultad `FAC-COM` (`…2b0a`), campo `dean`
+- Problema: `dean` apuntaba a `6ac057b232f78f9b9e14f3c3`, que no existe en `teachers`.
+- Solución: Decano original según el seed: docente `DOC-050` (`…2b3c`), activo y de esa misma facultad.
+- Cómo demostrarlo: `db.teachers.findOne({_id: db.faculties.findOne({code: "FAC-COM"}).dean})` → antes: null; después: DOC-050.
+- Commit: f1eccbb
+
+### DB-09 — Espacio sobrante en la sede
+- Dónde: database/faculties.json, facultad `FAC-SAL` (`…2b02`), campo `campus`
+- Problema: `"Bogotá "` con un espacio al final; no coincide con `"Bogotá"` al filtrar o agrupar por sede.
+- Solución: `"Bogotá"`.
+- Cómo demostrarlo: `db.faculties.distinct("campus")` → antes: incluye `"Bogotá"` y `"Bogotá "`; después: solo `"Bogotá"`.
+- Commit: f1eccbb
+
+### DB-10 — Código de programa duplicado
+- Dónde: database/programs.json, documento `6ac03d4229a649e6df069ebb` ("Derecho (jornada nocturna)")
+- Problema: Documento añadido con `code: "DERE"`, igual al del programa Derecho. Viola el índice único de `code` y hacía que `npm run db:import` se cortara con `E11000 duplicate key`, sin cargar las colecciones siguientes.
+- Solución: Eliminar el documento duplicado (no existe en el seed y ningún estudiante ni materia lo referencia).
+- Cómo demostrarlo: `npm run db:import` → antes: `E11000 ... code: "DERE"`; después: 13 colecciones importadas. `db.programs.countDocuments({code: "DERE"})` → 2 → 1.
+- Commit: f1eccbb
+
+### DB-11 — Créditos fuera de rango
+- Dónde: database/subjects.json, materia `ODON105` (`…299d`), campo `credits`
+- Problema: `credits: 0`; el esquema exige entre 1 y 10. Además no suma al límite de créditos por periodo.
+- Solución: `2` (valor original del seed).
+- Cómo demostrarlo: `db.subjects.findOne({code: "ODON105"})` → antes: `credits: 0`; después: `credits: 2`.
+- Commit: f1eccbb
+
+### DB-12 — Prerrequisito circular
+- Dónde: database/subjects.json, materia `MAT101` (`…2970`), campo `prerequisites`
+- Problema: La lista contenía su propio `_id`: nadie puede cumplir el prerrequisito, así que nadie podría matricular Cálculo 1.
+- Solución: `prerequisites: []` (es de primer semestre).
+- Cómo demostrarlo: `db.subjects.findOne({code: "MAT101"})` → antes: prerequisites con su propio _id; después: `[]`.
+- Commit: f1eccbb
+
+### DB-13 — Matrícula duplicada
+- Dónde: database/enrollments.json, documento `6ac057b232f78f9b9e14f3c2`
+- Problema: Documento añadido con el mismo estudiante y grupo que la matrícula `…2dfb`. Viola el índice único `student + group`.
+- Solución: Eliminar el duplicado.
+- Cómo demostrarlo: `db.enrollments.countDocuments({student: ObjectId("6abf0b8bfead57fb41c12b9c"), group: ObjectId("6abf0b8bfead57fb41c12c3e")})` → antes: 2; después: 1.
+- Commit: f1eccbb
+
+### DB-14 — Materia y periodo no coinciden con el grupo
+- Dónde: database/enrollments.json, matrículas `…2dfb` (campo `subject`) y `…2e1a` (campo `period`)
+- Problema: En `…2dfb` la materia era ARQU181 pero su grupo es de ODON105. En `…2e1a` el periodo era 2026-1 pero su grupo es de 2026-2. Esos campos son copia de los del grupo y se usan para validar prerrequisitos, créditos y cruces.
+- Solución: Igualarlos a los del grupo: `subject` → ODON105 (`…299d`); `period` → 2026-2 (`…2a35`).
+- Cómo demostrarlo: Comparar `enrollment.subject/period` con `group.subject/period` de cada una → antes: distintos; después: iguales.
+- Commit: f1eccbb
+
+### DB-15 — Estado incoherente con la nota final
+- Dónde: database/enrollments.json, matrícula `…2d25`, campo `status`
+- Problema: Estado `activa` con `finalGrade: 3.38` en el periodo 2025-1, que está cerrado y tiene sus 4 notas registradas.
+- Solución: `status: "aprobada"` (valor original; la nota final es correcta y ≥ 3.0).
+- Cómo demostrarlo: `db.enrollments.findOne({_id: ObjectId("6abf0b8bfead57fb41c12d25")})` → antes: `status: "activa"`; después: `"aprobada"`. El historial de Juliana muestra la materia aprobada.
+- Commit: f1eccbb
+
+### DB-16 — Contador de inscritos incorrecto
+- Dónde: database/groups.json, grupo `…2c3a` (MAT101, grupo 1, 2026-2), campo `enrolled`
+- Problema: `enrolled: 35` con `capacity: 32`, y solo hay 9 matrículas no canceladas. El grupo aparece sin cupos.
+- Solución: `enrolled: 9`.
+- Cómo demostrarlo: `db.enrollments.countDocuments({group: ObjectId("6abf0b8bfead57fb41c12c3a"), status: {$ne: "cancelada"}})` → 9; `enrolled` → antes: 35; después: 9.
+- Commit: f1eccbb
+
+### DB-17 — Contador de inscritos incorrecto
+- Dónde: database/groups.json, grupo `…2c3e` (ODON105, grupo 1, 2026-2), campo `enrolled`
+- Problema: `enrolled: 42` con `capacity: 39`; las matrículas reales son 9 tras quitar la duplicada (DB-13).
+- Solución: `enrolled: 9`.
+- Cómo demostrarlo: Mismo conteo que DB-16 sobre el grupo `…2c3e` → 9; `enrolled` → antes: 42; después: 9.
+- Commit: f1eccbb
+
+### DB-18 — Día fuera del enum
+- Dónde: database/groups.json, grupo `…2c3a`, campo `schedule[0].day`
+- Problema: Valor `Miércoles`; el enum `Day` usa minúsculas sin tilde. La detección de cruces compara el texto exacto y no veía el choque.
+- Solución: `miercoles`.
+- Cómo demostrarlo: `db.groups.findOne({_id: ObjectId("6abf0b8bfead57fb41c12c3a")})` → antes: `day: "Miércoles"`; después: `"miercoles"`.
+- Commit: f1eccbb
+
+### DB-19 — Horas invertidas
+- Dónde: database/groups.json, grupo `…2c64`, campo `schedule[0]`
+- Problema: Franja del jueves de `09:00` a `07:00`.
+- Solución: `07:00` a `09:00` (valor original).
+- Cómo demostrarlo: `db.groups.findOne({_id: ObjectId("6abf0b8bfead57fb41c12c64")})` → antes: 09:00–07:00; después: 07:00–09:00.
+- Commit: f1eccbb
+
+### DB-20 — Pesos que no suman 100
+- Dónde: database/evaluations.json, evaluación "Taller" (`…2dd4`) del grupo `…2c3a`, campo `weight`
+- Problema: Taller tenía peso 30: 25 + 25 + 30 + 30 = 110. La nota final ponderada puede pasar de 5.0.
+- Solución: `weight: 20` (suma 100).
+- Cómo demostrarlo: `db.evaluations.aggregate([{$match: {group: ObjectId("6abf0b8bfead57fb41c12c3a")}}, {$group: {_id: null, total: {$sum: "$weight"}}}])` → antes: 110; después: 100.
+- Commit: f1eccbb
+
+### DB-21 — Notas fuera de rango
+- Dónde: database/grades.json, notas `…2df0` y `…2dfc`, campo `value`
+- Problema: `value: 5.7`; la escala es 0.0 a 5.0.
+- Solución: Valores originales del seed: `2.7` y `2.6`.
+- Cómo demostrarlo: `db.grades.countDocuments({value: {$gt: 5}})` → antes: 2; después: 0.
+- Commit: f1eccbb
+
+### DB-22 — Tipo de dato incorrecto
+- Dónde: database/grades.json, nota `…2e1b`, campo `value`
+- Problema: `value: "4,2"` (texto con coma) en vez de número; rompe promedios y el cálculo de la nota final.
+- Solución: Número `2.7` (valor original del seed).
+- Cómo demostrarlo: `db.grades.countDocuments({value: {$type: "string"}})` → antes: 1; después: 0.
+- Commit: f1eccbb
+
+### DB-23 — Evaluación de otro grupo
+- Dónde: database/grades.json, nota `…2dfd`, campo `evaluation`
+- Problema: La nota es de la matrícula `…2dfb` (grupo `…2c3e`) pero apuntaba a la evaluación `…2e11`, que pertenece al grupo `…2c73`.
+- Solución: `evaluation` → `…2df2` (Parcial 2 del grupo de la matrícula).
+- Cómo demostrarlo: Comparar `evaluation.group` con `enrollment.group` de esa nota → antes: distintos; después: iguales.
+- Commit: f1eccbb
+
+### DB-24 — Tipo fuera del enum
+- Dónde: database/notifications.json, notificación `…2eb7`, campo `type`
+- Problema: Valor `aviso_urgente`, que no existe en `NotificationType`.
+- Solución: `matricula_confirmada` (valor original; el título es "Matrícula confirmada").
+- Cómo demostrarlo: `db.notifications.findOne({_id: ObjectId("6abf0b8bfead57fb41c12eb7")})` → antes: `type: "aviso_urgente"`; después: `"matricula_confirmada"`.
+- Commit: f1eccbb
+
+### DB-25 — Fecha con tipo incorrecto
+- Dónde: database/notifications.json, notificación `…2ec0`, campo `createdAt`
+- Problema: `createdAt: "ayer"` (texto) en vez de fecha; rompe el orden por fecha de las notificaciones.
+- Solución: `{"$date": "2026-08-02T00:00:00Z"}` (valor original).
+- Cómo demostrarlo: `db.notifications.countDocuments({createdAt: {$type: "string"}})` → antes: 1; después: 0.
+- Commit: f1eccbb
+
+### DB-26 — Perfil inactivo con usuario activo
+- Dónde: database/students.json, estudiante `E20210046` (`…2b9c`), campo `active`
+- Problema: `active: false` aunque su usuario está activo y tiene matrículas activas en el periodo abierto.
+- Solución: `active: true` (valor original).
+- Cómo demostrarlo: `db.students.findOne({code: "E20210046"})` → antes: `active: false`; después: `true`.
+- Commit: f1eccbb
+
+### DB-27 — Salón inactivo
+- Dónde: database/classrooms.json, salón `B-104` (`…2bef`), campo `active`
+- Problema: `active: false`; en el seed solo hay dos salones en mantenimiento (B-204 y D-101) y B-104 estaba activo.
+- Solución: `active: true`.
+- Cómo demostrarlo: `db.classrooms.find({active: false}, {code: 1})` → antes: B-104, B-204, D-101; después: B-204, D-101.
+- Commit: f1eccbb
+
+### DB-28 — Salón incorrecto
+- Dónde: database/groups.json, grupo `…2c3a`, campo `schedule[0].classroom`
+- Problema: El salón era B-104 (capacidad 22) para un grupo con cupo 32.
+- Solución: Salón original `…2bf9`.
+- Cómo demostrarlo: Comparar `classroom.capacity` con `group.capacity` → antes: 22 < 32; después: capacidad suficiente.
+- Commit: f1eccbb
+
+### DB-29 — Salón incorrecto y cruce de salón
+- Dónde: database/groups.json, grupo `…2c99`, campo `schedule[0].classroom`
+- Problema: La franja del miércoles 09:00–11:00 estaba en B-104 (capacidad 22, cupo 25), el mismo salón, día y hora que el grupo `…2c3a` en el mismo periodo.
+- Solución: Salón original `…2be1`.
+- Cómo demostrarlo: `db.groups.countDocuments({period: ObjectId("6abf0b8bfead57fb41c12a35"), schedule: {$elemMatch: {day: "miercoles", startTime: "09:00", classroom: ObjectId("6abf0b8bfead57fb41c12bef")}}})` → antes: 1 (2 contando el día mal escrito de DB-18); después: 0.
+- Commit: f1eccbb
+
+### DB-30 — Notas alteradas
+- Dónde: database/grades.json, notas `…2dd7` y `…2dd8`, campo `value`
+- Problema: Ambas tenían `3`; el seed determinista genera `3.4` para las dos. Valor dentro de rango, solo detectable comparando con los datos regenerados.
+- Solución: `3.4` en las dos.
+- Cómo demostrarlo: `db.grades.findOne({_id: ObjectId("6abf0b8bfead57fb41c12dd7")})` y `…2dd8` → antes: `value: 3`; después: `3.4`.
+- Commit: f1eccbb
 
 ## Frontend
