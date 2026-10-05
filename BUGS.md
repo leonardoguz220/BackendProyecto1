@@ -23,6 +23,7 @@ Estados: corregido y verificado, corregido sin verificar, sospecha, pendiente.
 | BE-16 | groups | GET /groups/mine capturado por GET /groups/:id | corregido y verificado | fix(BE-16) |
 | BE-17 | groups | assertCanManage no restringe a los docentes | corregido y verificado | fix(BE-17) |
 | BE-18 | enrollments | GET /enrollments/mine solo para docentes | corregido y verificado | fix(BE-18) |
+| BE-19 | enrollments | Matricular responde 400 aunque la matrícula queda activa | corregido y verificado | fix(BE-19) |
 
 ## Backend
 
@@ -169,6 +170,13 @@ Estados: corregido y verificado, corregido sin verificar, sospecha, pendiente.
 - Solución: `@Roles(Role.Estudiante)`.
 - Cómo demostrarlo: `GET /api/enrollments/mine` con token de juliana.herrera147 → antes 403; después 200 con su paginación. Con docente → 403.
 - Commit: fix(BE-18)
+
+### BE-19 — Condición invertida al confirmar matrícula
+- Dónde: src/enrollments/enrollments.service.ts:79 (enroll)
+- Problema: `if (created.status === EnrollmentStatus.Active) throw` lanzaba 400 justo cuando la matrícula sí se creó; la matrícula y el cupo ya estaban guardados, así que el estudiante veía error pero quedaba matriculado.
+- Solución: Invertir la condición: `if (created.status !== EnrollmentStatus.Active) throw`.
+- Cómo demostrarlo: Datos QA creados por API: periodo QA-2099-1 (abierto) y grupo 6ac3d68d2470a6c9903e0dfe (MAT101, docente Laura). `POST /api/enrollments {groupId}` con juliana.herrera147 → antes 400 `No se pudo confirmar la matricula` pero en Mongo la matrícula quedó `activa` y `enrolled` 1; después 201 con `status: activa`.
+- Commit: fix(BE-19)
 
 ## Base de datos
 
