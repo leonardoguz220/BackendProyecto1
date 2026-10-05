@@ -14,6 +14,7 @@ Estados: corregido y verificado, corregido sin verificar, sospecha, pendiente.
 | BE-02 | main | Swagger publicado en /api/doc | corregido y verificado | fix(BE-02) |
 | BE-04 | config | .env.example apunta Mongo al puerto 27018 | corregido y verificado | fix(BE-04) |
 | BE-05 | config | JWT_SECRET vacío en .env.example | corregido y verificado | fix(BE-05) |
+| BE-10 | users | POST /users responde 400 aunque crea el usuario | corregido y verificado | fix(BE-10) |
 
 ## Backend
 
@@ -97,6 +98,13 @@ Estados: corregido y verificado, corregido sin verificar, sospecha, pendiente.
 - Solución: Valor de ejemplo de 16+ caracteres (`cambia-este-secreto-de-ejemplo-123456`).
 - Cómo demostrarlo: Ejecutar `validateEnv` con los valores de .env.example → antes `JWT_SECRET must be longer than or equal to 16 characters`; después `validateEnv OK`.
 - Commit: fix(BE-05)
+
+### BE-10 — @HttpCode(400) en crear usuario
+- Dónde: src/users/users.controller.ts:28 (create)
+- Problema: `@HttpCode(400)` forzaba 400 Bad Request en una creación exitosa; el usuario sí se guardaba pero el cliente lo veía como error.
+- Solución: Quitar `@HttpCode(400)` (Nest devuelve 201 en POST).
+- Cómo demostrarlo: `POST /api/users` (admin) con `{name, email: qa.be10@..., password: Secret123!, role: estudiante}` → antes HTTP 400 con el usuario creado en el cuerpo; después HTTP 201 (qa.be10b@...).
+- Commit: fix(BE-10)
 
 ## Base de datos
 
