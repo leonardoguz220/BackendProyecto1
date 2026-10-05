@@ -7,6 +7,7 @@ Estados: corregido y verificado, corregido sin verificar, sospecha, pendiente.
 | BE-25 | reports | ReportsService no registrado: la API no arranca | corregido y verificado | fix(BE-25) |
 | BE-01 | main | Prefijo global api/v1 en vez de api | corregido y verificado | fix(BE-01) |
 | BE-03 | main | Puerto leído de APP_PORT con default 3001 | corregido y verificado | fix(BE-03) |
+| BE-06 | auth | RolesGuard no registrado: @Roles no se aplica | corregido y verificado | fix(BE-06) |
 
 ## Backend
 
@@ -39,6 +40,13 @@ Estados: corregido y verificado, corregido sin verificar, sospecha, pendiente.
 - Solución: `Number(process.env.PORT ?? 3000)`.
 - Cómo demostrarlo: `curl -X POST http://localhost:3000/api/auth/login ...` → antes conexión rechazada en 3000; después 201.
 - Commit: fix(BE-03)
+
+### BE-06 — Falta RolesGuard global
+- Dónde: src/auth/auth.module.ts (providers, APP_GUARD)
+- Problema: Solo estaba registrado JwtAuthGuard como APP_GUARD; los decoradores `@Roles(...)` no tenían efecto y cualquier usuario autenticado accedía a rutas de admin.
+- Solución: Importar RolesGuard y agregar `{ provide: APP_GUARD, useClass: RolesGuard }` después del de JWT.
+- Cómo demostrarlo: Token de juliana.herrera147 (estudiante): `GET /api/users` → antes 200 con la lista de usuarios; después 403 `No tienes permisos para esta accion`. Admin sigue con 200.
+- Commit: fix(BE-06)
 
 ## Base de datos
 
