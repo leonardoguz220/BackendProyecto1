@@ -34,6 +34,7 @@ Estados: corregido y verificado, corregido sin verificar, sospecha, pendiente.
 | BE-28 | notifications | Filtro read convierte cualquier texto en false | corregido y verificado | fix(BE-28) |
 | BE-29 | swagger/auth | Ejemplo de Swagger del login con clave inválida | corregido y verificado | fix(BE-29) |
 | BE-30 | periods | Un periodo abierto puede volver a planificado | corregido y verificado | fix(BE-30) |
+| BE-31 | postman | La colección de Postman no envía el token: todo da 401 | corregido y verificado | fix(BE-31) |
 | DB-01 | users | Email de Laura López con mayúsculas | corregido y verificado | fix(DB-01) |
 | DB-02 | users | Rol de Laura López fuera del enum | corregido y verificado | fix(DB-02) |
 | DB-03 | users | Laura López inactiva | corregido y verificado | fix(DB-03) |
@@ -291,6 +292,13 @@ Estados: corregido y verificado, corregido sin verificar, sospecha, pendiente.
 - Solución: En update, si el periodo está abierto y se pide `planificado`, lanzar 400 `Un periodo abierto no puede volver a planificado`.
 - Cómo demostrarlo: Admin `PATCH /api/periods/6abf0b8bfead57fb41c12a35 {status: planificado}` → antes 200 (luego `POST /api/enrollments/6ac3dc3a5362fba6e951bdce/cancel` de juliana → 400 y `GET /periods/current` → 404); después 400 `Un periodo abierto no puede volver a planificado`, el periodo sigue abierto y la cancelación responde 201. Planificado → abierto y editar fechas siguen funcionando (200). Datos reales restaurados.
 - Commit: fix(BE-30)
+
+### BE-31 — Colección de Postman sin autenticación
+- Dónde: postman/proyecto1-simple.postman_collection.json (auth de la colección y request Login)
+- Problema: Ninguna petición lleva `Authorization` ni el login guarda el `accessToken`; como todas las rutas salvo health y login exigen JWT, la colección tal cual responde 401 en /users, /programs, /periods, etc.
+- Solución: Auth Bearer a nivel de colección con `{{token}}`, variable `token` y un script de test en `POST /api/auth/login` que hace `pm.collectionVariables.set("token", body.accessToken)`.
+- Cómo demostrarlo: Antes: `GET /api/users?page=1&limit=20` sin token (como la colección) → 401 (igual /programs y /periods). Después, ejecutando las peticiones GET de la colección en orden con un mini-runner en node que aplica la auth y el script del login: health, login, auth/me, users, programs, subjects, periods, students y teachers → 200; students/me y teachers/me → 403 (correcto con token de admin). No se ejecutó en la app de Postman.
+- Commit: fix(BE-31)
 
 ## Base de datos
 
