@@ -1,11 +1,11 @@
 // Audita la integridad de database/*.json (no necesita MongoDB ni modifica nada).
-// Uso: node scripts/db-audit.js        Sale con codigo 1 si encuentra problemas.
+// Uso: node scripts/db-audit.js [carpeta]     (por defecto database/). Sale con codigo 1 si encuentra problemas.
 const { EJSON } = require('bson');
 const bcrypt = require('bcrypt');
 const fs = require('fs');
 const path = require('path');
 
-const DIR = path.join(__dirname, '..', 'database');
+const DIR = path.resolve(process.argv[2] ?? path.join(__dirname, '..', 'database'));
 const load = (name) => EJSON.parse(fs.readFileSync(path.join(DIR, name + '.json'), 'utf8'));
 const NAMES = ['users', 'programs', 'subjects', 'periods', 'students', 'teachers', 'faculties', 'classrooms', 'groups', 'enrollments', 'evaluations', 'grades', 'notifications'];
 const db = Object.fromEntries(NAMES.map((n) => [n, load(n)]));

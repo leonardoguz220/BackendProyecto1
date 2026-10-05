@@ -18,17 +18,6 @@ users=201  programs=101  subjects=100  periods=100  students=100  teachers=100  
 [1] enrollments :: indice unico violado
     6ac057b232f78f9b9e14f3c2  student+group=6abf0b8bfead57fb41c12b9c|6abf0b8bfead57fb41c12c3e (igual que 6abf0b8bfead57fb41c12dfb)
 
-[47] grades :: timestamps
-    6abf0b8bfead57fb41c12dd8  createdAt posterior a updatedAt
-    6abf0b8bfead57fb41c12ddb  createdAt posterior a updatedAt
-    6abf0b8bfead57fb41c12dde  createdAt posterior a updatedAt
-    6abf0b8bfead57fb41c12de1  createdAt posterior a updatedAt
-    6abf0b8bfead57fb41c12de3  createdAt posterior a updatedAt
-    6abf0b8bfead57fb41c12de9  createdAt posterior a updatedAt
-    6abf0b8bfead57fb41c12dea  createdAt posterior a updatedAt
-    6abf0b8bfead57fb41c12df0  createdAt posterior a updatedAt
-    ... y 39 mas
-
 [1] notifications :: timestamps
     6abf0b8bfead57fb41c12ec0  createdAt=ayer updatedAt=Thu Oct 01 2026 21:40:27 GMT-0400 (hora de Bolivia)
 
@@ -134,4 +123,4 @@ users=201  programs=101  subjects=100  periods=100  students=100  teachers=100  
 [1] notifications :: enum
     6abf0b8bfead57fb41c12eb7  type=aviso_urgente
 
-110 problemas en 36 reglas.
+63 problemas en 35 reglas.

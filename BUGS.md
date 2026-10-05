@@ -294,7 +294,12 @@ Estados: corregido y verificado, corregido sin verificar, sospecha, pendiente.
 
 ## Base de datos
 
-> Nota: los 30 bugs de datos se corrigieron juntos en el commit f1eccbb, porque DB-10 impedía completar `npm run db:import`. Los valores corregidos salen de regenerar los datos con `scripts/db-seed.js` (determinista) y compararlos campo a campo. Verificación global: `node scripts/db-audit.js` → antes 63 avisos reales, después `Sin problemas de integridad` (salidas en `evidencias/`); `npm run db:import` importa las 13 colecciones; login 200 de los tres usuarios de prueba. Los `_id` abreviados como `…xxxx` llevan el prefijo `6abf0b8bfead57fb41c1`. La configuración de Mongo en `.env.example` está registrada como BE-04 y BE-05.
+Los 30 bugs estaban en los datos de `database/*.json`; los esquemas de `src/**/schemas` se revisaron y no tienen errores. La configuración de Mongo en `.env.example` está registrada como BE-04 y BE-05.
+
+- **Cómo se encontraron:** `scripts/db-audit.js` cruza las 13 colecciones (referencias, únicos, enums, rangos, tipos y coherencia entre colecciones). Los valores correctos salen de regenerar los datos con `scripts/db-seed.js`, que es determinista, y compararlos campo a campo.
+- **Commit:** todos se corrigieron juntos en `f1eccbb`, porque DB-10 impedía completar `npm run db:import`.
+- **Verificación global:** auditoría de 63 avisos a ninguno (salidas en `evidencias/`), importación completa de las 13 colecciones y login 200 de los tres usuarios de prueba. Cada consulta de "Cómo demostrarlo" se ejecutó sobre los datos originales y sobre los corregidos.
+- **Abreviaturas:** los `_id` escritos como `…xxxx` llevan el prefijo `6abf0b8bfead57fb41c1`.
 
 ### DB-01 — Email con mayúsculas
 - Dónde: database/users.json, usuario Laura López (`…2a90`), campo `email`
