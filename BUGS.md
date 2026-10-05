@@ -29,6 +29,7 @@ Estados: corregido y verificado, corregido sin verificar, sospecha, pendiente.
 | BE-22 | evaluations | POST /evaluations responde 400 aunque crea | corregido y verificado | fix(BE-22) |
 | BE-23 | grades | Nota máxima validada en 4.5 (escala 0–5) | corregido y verificado | fix(BE-23) |
 | BE-24 | grades | Nota final 3.0 queda reprobada | corregido y verificado | fix(BE-24) |
+| BE-26 | notifications | Marcar como leída no cambia read | corregido y verificado | fix(BE-26) |
 
 ## Backend
 
@@ -217,6 +218,13 @@ Estados: corregido y verificado, corregido sin verificar, sospecha, pendiente.
 - Solución: `finalGrade >= PASSING_GRADE`.
 - Cómo demostrarlo: Grupo QA 6ac3d68d2470a6c9903e0dfe con evaluaciones 40/40/20 y nota 3 en todas. `POST /api/grades/finalize/<matrícula>` (docente Laura) → antes matrícula 6ac3d6922470a6c9903e0e0f: `finalGrade 3, status reprobada`; después matrícula 6ac3d75e070dfa76b6f1f611: `finalGrade 3, status aprobada`.
 - Commit: fix(BE-24)
+
+### BE-26 — markRead no pone read = true
+- Dónde: src/notifications/notifications.service.ts (markRead)
+- Problema: Solo se asignaba `readAt`; `read` seguía en `false`, así que la notificación seguía contando como no leída en la bandeja.
+- Solución: Agregar `notification.read = true;` antes de `readAt`.
+- Cómo demostrarlo: Estudiante juliana.herrera147: `PATCH /api/notifications/<id>/read` → antes 200 con `read:false` y `readAt` puesto (6ac3d753070dfa76b6f1f5f9); después 200 con `read:true` (6ac3d72db604514b766ae4a5). Con token de otro usuario → 403.
+- Commit: fix(BE-26)
 
 ## Base de datos
 
