@@ -31,6 +31,7 @@ Estados: corregido y verificado, corregido sin verificar, sospecha, pendiente.
 | BE-24 | grades | Nota final 3.0 queda reprobada | corregido y verificado | fix(BE-24) |
 | BE-26 | notifications | Marcar como leída no cambia read | corregido y verificado | fix(BE-26) |
 | BE-27 | postman | Postman crea/edita docentes con campo department inexistente | corregido y verificado | fix(BE-27) |
+| BE-28 | notifications | Filtro read convierte cualquier texto en false | corregido y verificado | fix(BE-28) |
 
 ## Backend
 
@@ -233,6 +234,13 @@ Estados: corregido y verificado, corregido sin verificar, sospecha, pendiente.
 - Solución: Cambiar `department` por `faculty: PEGA_AQUI_EL_ID_DE_LA_FACULTAD` en ambos cuerpos (igual que los demás placeholders de la colección).
 - Cómo demostrarlo: Usuario QA docente 6ac3d80e5593b9da19ca2c38: `POST /api/teachers {user, code: DOC-QA-1, department: Ingenieria}` (cuerpo antiguo) → 400 `property department should not exist`, `faculty must be a mongodb id`; con el cuerpo corregido y la facultad 6abf0b8bfead57fb41c12b01 → 201.
 - Commit: fix(BE-27)
+
+### BE-28 — Transform propio en NotificationsQueryDto.read
+- Dónde: src/notifications/dto/notification.dto.ts (NotificationsQueryDto.read)
+- Problema: Mismo defecto que BE-15: `@Transform(({ value }) => value === 'true' || value === true)` convierte `read=abc` en `false`, IsBoolean nunca rechaza y se devuelven las no leídas en silencio.
+- Solución: `@Transform(toBoolean)` de common/dto/query-helpers, como el resto de filtros booleanos.
+- Cómo demostrarlo: `GET /api/notifications/mine?read=abc` (juliana.herrera147) → antes 200 con total 5 (= read=false); después 400 `read must be a boolean value`. `read=true` (1) y `read=false` (5) siguen igual.
+- Commit: fix(BE-28)
 
 ## Base de datos
 
