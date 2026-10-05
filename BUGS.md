@@ -33,6 +33,7 @@ Estados: corregido y verificado, corregido sin verificar, sospecha, pendiente.
 | BE-27 | postman | Postman crea/edita docentes con campo department inexistente | corregido y verificado | fix(BE-27) |
 | BE-28 | notifications | Filtro read convierte cualquier texto en false | corregido y verificado | fix(BE-28) |
 | BE-29 | swagger/auth | Ejemplo de Swagger del login con clave inválida | corregido y verificado | fix(BE-29) |
+| BE-30 | periods | Un periodo abierto puede volver a planificado | corregido y verificado | fix(BE-30) |
 | DB-01 | users | Email de Laura López con mayúsculas | corregido y verificado | f1eccbb |
 | DB-02 | users | Rol de Laura López fuera del enum | corregido y verificado | f1eccbb |
 | DB-03 | users | Laura López inactiva | corregido y verificado | f1eccbb |
@@ -281,9 +282,15 @@ Estados: corregido y verificado, corregido sin verificar, sospecha, pendiente.
 - Commit: fix(BE-29)
 
 ### Sospechas y observaciones (sin cambio de código)
-- **Periodo abierto puede volver a planificado**: `PATCH /api/periods/:id {"status":"planificado"}` sobre un periodo `abierto` responde 200 (probado con el periodo QA 6ac3d6872470a6c9903e0dee). El comentario de `periods.service.ts` (update) dice que el ciclo es planificado → abierto → cerrado, pero no hay requisito explícito que prohíba retroceder. Estado: sospecha.
 - **`POST /api/enrollments/:id/cancel` responde 201**: las demás acciones POST que no crean recursos (`/periods/:id/close`, `/grades/finalize/:id`, `/groups/:id/finalize`, `/users/:id/reset-password`) usan `@HttpCode(200)`. Sin requisito explícito. Estado: sospecha.
 - **Entorno**: durante la corrección, `npm run db:import` se detenía en `programs` (DB-10) y varios endpoints daban 500 por datos desalineados; BE-17 a BE-24 se probaron con datos QA creados por la API. Tras integrar los arreglos de base de datos (commit f1eccbb) la importación es completa: progress, history, roster y grade-sheet responden 200, y BE-17 se re-verificó con datos reales (Laura en el grupo ajeno 6abf0b8bfead57fb41c12c37 → 403).
+
+### BE-30 — PATCH /periods permite retroceder abierto → planificado
+- Dónde: src/periods/periods.service.ts (update, validación del ciclo de vida)
+- Problema: El propio servicio define el ciclo `planificado → abierto → cerrado` y bloquea reabrir un cerrado, pero no bloqueaba `abierto → planificado`. Con el periodo 2026-2 (49 matrículas activas) en planificado: no hay periodo actual (`GET /periods/current` 404) y los estudiantes no pueden cancelar (`El periodo ya no esta abierto`).
+- Solución: En update, si el periodo está abierto y se pide `planificado`, lanzar 400 `Un periodo abierto no puede volver a planificado`.
+- Cómo demostrarlo: Admin `PATCH /api/periods/6abf0b8bfead57fb41c12a35 {status: planificado}` → antes 200 (luego `POST /api/enrollments/6ac3dc3a5362fba6e951bdce/cancel` de juliana → 400 y `GET /periods/current` → 404); después 400 `Un periodo abierto no puede volver a planificado`, el periodo sigue abierto y la cancelación responde 201. Planificado → abierto y editar fechas siguen funcionando (200). Datos reales restaurados.
+- Commit: fix(BE-30)
 
 ## Base de datos
 
