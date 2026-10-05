@@ -22,6 +22,7 @@ Estados: corregido y verificado, corregido sin verificar, sospecha, pendiente.
 | BE-15 | users | Filtro active convierte cualquier texto en false | corregido y verificado | fix(BE-15) |
 | BE-16 | groups | GET /groups/mine capturado por GET /groups/:id | corregido y verificado | fix(BE-16) |
 | BE-17 | groups | assertCanManage no restringe a los docentes | corregido y verificado | fix(BE-17) |
+| BE-18 | enrollments | GET /enrollments/mine solo para docentes | corregido y verificado | fix(BE-18) |
 
 ## Backend
 
@@ -161,6 +162,13 @@ Estados: corregido y verificado, corregido sin verificar, sospecha, pendiente.
 - Solución: `if (user.role === Role.Docente)`: el docente solo gestiona grupos cuyo `teacher` es su perfil; el admin gestiona todos.
 - Cómo demostrarlo: `GET /api/groups/6abf0b8bfead57fb41c12c37/roster` con token de laura.lopez89 (no es su grupo) → antes pasaba la verificación (terminaba en 500 por datos); después 403 `El grupo no esta a tu cargo`. Nota: con admin ese grupo da 500 porque su `subject` no existe en la colección actual (importación incompleta por DB-10).
 - Commit: fix(BE-17)
+
+### BE-18 — Rol incorrecto en Mis matrículas
+- Dónde: src/enrollments/enrollments.controller.ts:34 (mine)
+- Problema: `@Roles(Role.Docente)` en el endpoint de matrículas propias: el estudiante (único que tiene matrículas) recibía 403.
+- Solución: `@Roles(Role.Estudiante)`.
+- Cómo demostrarlo: `GET /api/enrollments/mine` con token de juliana.herrera147 → antes 403; después 200 con su paginación. Con docente → 403.
+- Commit: fix(BE-18)
 
 ## Base de datos
 
