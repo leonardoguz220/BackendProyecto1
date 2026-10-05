@@ -25,6 +25,7 @@ Estados: corregido y verificado, corregido sin verificar, sospecha, pendiente.
 | BE-18 | enrollments | GET /enrollments/mine solo para docentes | corregido y verificado | fix(BE-18) |
 | BE-19 | enrollments | Matricular responde 400 aunque la matrícula queda activa | corregido y verificado | fix(BE-19) |
 | BE-20 | enrollments | Cancelar matrícula no libera el cupo | corregido y verificado | fix(BE-20) |
+| BE-21 | evaluations | Controlador montado en /evaluationslalala | corregido y verificado | fix(BE-21) |
 
 ## Backend
 
@@ -185,6 +186,13 @@ Estados: corregido y verificado, corregido sin verificar, sospecha, pendiente.
 - Solución: Dentro de la misma transacción: `await this.groupModel.updateOne({ _id: enrollment.group }, { $inc: { enrolled: -1 } }, { session });`.
 - Cómo demostrarlo: Grupo QA 6ac3d68d2470a6c9903e0dfe, matrícula 6ac3d6922470a6c9903e0e0f de juliana.herrera147: `POST /api/enrollments/<id>/cancel` → antes status `cancelada` y `enrolled` seguía en 1; después status `cancelada` y `enrolled` pasó de 2 a 1 (`GET /api/groups/<id>`).
 - Commit: fix(BE-20)
+
+### BE-21 — Ruta base de evaluaciones incorrecta
+- Dónde: src/evaluations/evaluations.controller.ts:14 (@Controller)
+- Problema: `@Controller('evaluationslalala')`: todos los endpoints de evaluaciones daban 404 en /api/evaluations (ruta usada por Postman, Swagger y el frontend).
+- Solución: `@Controller('evaluations')`.
+- Cómo demostrarlo: `GET /api/evaluations?limit=1` (admin) → antes 404 (y /api/evaluationslalala 200); después 200 con total 100.
+- Commit: fix(BE-21)
 
 ## Base de datos
 
