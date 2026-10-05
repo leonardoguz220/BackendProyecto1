@@ -27,6 +27,7 @@ Estados: corregido y verificado, corregido sin verificar, sospecha, pendiente.
 | BE-20 | enrollments | Cancelar matrícula no libera el cupo | corregido y verificado | fix(BE-20) |
 | BE-21 | evaluations | Controlador montado en /evaluationslalala | corregido y verificado | fix(BE-21) |
 | BE-22 | evaluations | POST /evaluations responde 400 aunque crea | corregido y verificado | fix(BE-22) |
+| BE-23 | grades | Nota máxima validada en 4.5 (escala 0–5) | corregido y verificado | fix(BE-23) |
 
 ## Backend
 
@@ -201,6 +202,13 @@ Estados: corregido y verificado, corregido sin verificar, sospecha, pendiente.
 - Solución: Quitar el decorador (y los imports que quedaron sin uso); el POST responde 201.
 - Cómo demostrarlo: Docente laura.lopez89 en su grupo QA 6ac3d68d2470a6c9903e0dfe: `POST /api/evaluations {group, name: QA Parcial 1, weight: 40}` → antes 400 con la evaluación creada en el cuerpo; después 201 (`QA Parcial 2`). Estudiante → 403.
 - Commit: fix(BE-22)
+
+### BE-23 — @Max(4.5) en UpsertGradeDto
+- Dónde: src/grades/dto/grade.dto.ts:18 (value)
+- Problema: `@Max(4.5)` rechazaba notas válidas entre 4.5 y 5.0, aunque la propia doc Swagger dice `maximum: 5` (`Nota de 0.0 a 5.0`).
+- Solución: `@Max(5)`.
+- Cómo demostrarlo: Docente Laura, matrícula QA 6ac3d6922470a6c9903e0e0f, evaluación QA Parcial 1: `PUT /api/grades {value: 4.8}` → antes 400 `value must not be greater than 4.5`; después 200. Con `value: 5.1` → 400 `must not be greater than 5`.
+- Commit: fix(BE-23)
 
 ## Base de datos
 
