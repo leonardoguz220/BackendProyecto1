@@ -6,6 +6,7 @@ Estados: corregido y verificado, corregido sin verificar, sospecha, pendiente.
 |---|---|---|---|---|
 | BE-25 | reports | ReportsService no registrado: la API no arranca | corregido y verificado | fix(BE-25) |
 | BE-01 | main | Prefijo global api/v1 en vez de api | corregido y verificado | fix(BE-01) |
+| BE-03 | main | Puerto leído de APP_PORT con default 3001 | corregido y verificado | fix(BE-03) |
 
 ## Backend
 
@@ -31,6 +32,13 @@ Estados: corregido y verificado, corregido sin verificar, sospecha, pendiente.
 - Solución: `app.setGlobalPrefix('api')`.
 - Cómo demostrarlo: `curl -X POST http://localhost:3000/api/auth/login -d '{"email":"admin@universidad.edu","password":"Secret123!"}'` → antes 404; después 201 con accessToken. `GET /api/v1/health` ahora 404.
 - Commit: fix(BE-01)
+
+### BE-03 — Puerto de la API incorrecto
+- Dónde: src/main.ts:27 (const port)
+- Problema: Usaba `process.env.APP_PORT ?? 3001`; la variable del .env es `PORT` y el README exige el puerto 3000, así que la API escuchaba en 3001 (choca con el frontend).
+- Solución: `Number(process.env.PORT ?? 3000)`.
+- Cómo demostrarlo: `curl -X POST http://localhost:3000/api/auth/login ...` → antes conexión rechazada en 3000; después 201.
+- Commit: fix(BE-03)
 
 ## Base de datos
 
