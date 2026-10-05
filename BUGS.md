@@ -5,6 +5,7 @@ Estados: corregido y verificado, corregido sin verificar, sospecha, pendiente.
 | ID | Módulo | Problema | Estado | Commit |
 |---|---|---|---|---|
 | BE-25 | reports | ReportsService no registrado: la API no arranca | corregido y verificado | fix(BE-25) |
+| BE-01 | main | Prefijo global api/v1 en vez de api | corregido y verificado | fix(BE-01) |
 
 ## Backend
 
@@ -23,6 +24,13 @@ Estados: corregido y verificado, corregido sin verificar, sospecha, pendiente.
 - Solución: Descomentar el import y `providers: [ReportsService]`.
 - Cómo demostrarlo: `npm run start:dev` → antes: error de dependencia de ReportsController y la app no inicia; después: log `Nest application successfully started` y `ReportsController {/api/reports}` mapeado.
 - Commit: fix(BE-25)
+
+### BE-01 — Prefijo global de rutas incorrecto
+- Dónde: src/main.ts:10 (app.setGlobalPrefix)
+- Problema: El prefijo era `api/v1`; el README define la API en http://localhost:3000/api, así que todas las rutas documentadas daban 404.
+- Solución: `app.setGlobalPrefix('api')`.
+- Cómo demostrarlo: `curl -X POST http://localhost:3000/api/auth/login -d '{"email":"admin@universidad.edu","password":"Secret123!"}'` → antes 404; después 201 con accessToken. `GET /api/v1/health` ahora 404.
+- Commit: fix(BE-01)
 
 ## Base de datos
 
