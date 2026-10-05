@@ -19,6 +19,7 @@ Estados: corregido y verificado, corregido sin verificar, sospecha, pendiente.
 | BE-12 | users | UpdateUserDto usa el campo namesssss | corregido y verificado | fix(BE-12) |
 | BE-13 | users | Cambiar contraseña no guarda la nueva clave | corregido y verificado | fix(BE-13) |
 | BE-14 | users | Búsqueda q de usuarios distingue mayúsculas | corregido y verificado | fix(BE-14) |
+| BE-15 | users | Filtro active convierte cualquier texto en false | corregido y verificado | fix(BE-15) |
 
 ## Backend
 
@@ -137,6 +138,13 @@ Estados: corregido y verificado, corregido sin verificar, sospecha, pendiente.
 - Solución: `new RegExp(escapeRegex(query.q.trim()), 'i')`.
 - Cómo demostrarlo: `GET /api/users?q=JULIANA` (admin) → antes total 0; después el mismo total que `q=juliana`.
 - Commit: fix(BE-14)
+
+### BE-15 — Transform propio en UsersQueryDto.active
+- Dónde: src/users/dto/user.dto.ts (UsersQueryDto.active)
+- Problema: `@Transform(({ value }) => value === 'true' || value === true)` convertía cualquier valor no válido (`abc`) en `false`, así `IsBoolean` nunca rechazaba y se filtraban inactivos en silencio. Los demás DTO usan el helper `toBoolean`.
+- Solución: `@Transform(toBoolean)` importado de common/dto/query-helpers.
+- Cómo demostrarlo: `GET /api/users?active=abc` (admin) → antes 200 con usuarios inactivos; después 400 `active must be a boolean value`. `active=true` y `active=false` siguen filtrando bien (200).
+- Commit: fix(BE-15)
 
 ## Base de datos
 
