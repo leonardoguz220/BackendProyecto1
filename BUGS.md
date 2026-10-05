@@ -11,6 +11,7 @@ Estados: corregido y verificado, corregido sin verificar, sospecha, pendiente.
 | BE-07 | auth | Token JWT vence en 3,6 s | corregido y verificado | fix(BE-07) |
 | BE-08 | auth | Login exige password de 12+ caracteres | corregido y verificado | fix(BE-08) |
 | BE-09 | auth | Login espera 5 s en cada intento | corregido y verificado | fix(BE-09) |
+| BE-02 | main | Swagger publicado en /api/doc | corregido y verificado | fix(BE-02) |
 
 ## Backend
 
@@ -73,6 +74,13 @@ Estados: corregido y verificado, corregido sin verificar, sospecha, pendiente.
 - Solución: Quitar la llamada y el método.
 - Cómo demostrarlo: `time curl -X POST http://localhost:3000/api/auth/login ...` → antes ≥5 s (por código); después 0,85 s, HTTP 201.
 - Commit: fix(BE-09)
+
+### BE-02 — Ruta de Swagger incorrecta
+- Dónde: src/main.ts:25 (SwaggerModule.setup)
+- Problema: Swagger se montaba en `api/doc`; el README lo documenta en http://localhost:3000/api/docs.
+- Solución: `SwaggerModule.setup('api/docs', ...)`.
+- Cómo demostrarlo: `curl -o /dev/null -w '%{http_code}' http://localhost:3000/api/docs` → antes 404 (y /api/doc 200); después 200 (y /api/doc 404).
+- Commit: fix(BE-02)
 
 ## Base de datos
 
