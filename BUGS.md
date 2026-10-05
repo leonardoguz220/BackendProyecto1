@@ -18,6 +18,7 @@ Estados: corregido y verificado, corregido sin verificar, sospecha, pendiente.
 | BE-11 | users | GET /users/me capturado por GET /users/:id | corregido y verificado | fix(BE-11) |
 | BE-12 | users | UpdateUserDto usa el campo namesssss | corregido y verificado | fix(BE-12) |
 | BE-13 | users | Cambiar contraseña no guarda la nueva clave | corregido y verificado | fix(BE-13) |
+| BE-14 | users | Búsqueda q de usuarios distingue mayúsculas | corregido y verificado | fix(BE-14) |
 
 ## Backend
 
@@ -129,6 +130,13 @@ Estados: corregido y verificado, corregido sin verificar, sospecha, pendiente.
 - Solución: `return user.save();`.
 - Cómo demostrarlo: Usuario de prueba qa.be10b@universidad.edu: `PATCH /api/auth/change-password {currentPassword: Secret123!, newPassword: NuevaClave123}` → 200. Antes: login con Secret123! 200 y con NuevaClave123 401. Después: Secret123! 401 y NuevaClave123 200.
 - Commit: fix(BE-13)
+
+### BE-14 — RegExp sin flag i en findAll de usuarios
+- Dónde: src/users/users.service.ts (findAll, filtro q)
+- Problema: `new RegExp(escapeRegex(q))` sin flag `i`: buscar `JULIANA` no encontraba a `Juliana ...`; el resto de buscadores (findIdsByText, textPattern) sí ignoran mayúsculas.
+- Solución: `new RegExp(escapeRegex(query.q.trim()), 'i')`.
+- Cómo demostrarlo: `GET /api/users?q=JULIANA` (admin) → antes total 0; después el mismo total que `q=juliana`.
+- Commit: fix(BE-14)
 
 ## Base de datos
 
