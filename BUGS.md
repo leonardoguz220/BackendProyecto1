@@ -253,7 +253,7 @@ Estados: corregido y verificado, corregido sin verificar, sospecha, pendiente.
 ### Sospechas y observaciones (sin cambio de código)
 - **Periodo abierto puede volver a planificado**: `PATCH /api/periods/:id {"status":"planificado"}` sobre un periodo `abierto` responde 200 (probado con el periodo QA 6ac3d6872470a6c9903e0dee). El comentario de `periods.service.ts` (update) dice que el ciclo es planificado → abierto → cerrado, pero no hay requisito explícito que prohíba retroceder. Estado: sospecha.
 - **`POST /api/enrollments/:id/cancel` responde 201**: las demás acciones POST que no crean recursos (`/periods/:id/close`, `/grades/finalize/:id`, `/groups/:id/finalize`, `/users/:id/reset-password`) usan `@HttpCode(200)`. Sin requisito explícito. Estado: sospecha.
-- **Entorno**: `npm run db:import` se detiene en `programs` por el código duplicado `DERE` (DB-10, base de datos). Las colecciones `students`, `subjects`, `teachers` y `users` quedan de una carga anterior y no coinciden con `groups`/`programs`; por eso `/students/:id/progress`, `/students/:id/history` y el roster de grupos del seed dan 500 (populate nulo). Las pruebas de BE-17 a BE-24 usaron datos QA creados por la API.
+- **Entorno**: durante la corrección, `npm run db:import` se detenía en `programs` (DB-10) y varios endpoints daban 500 por datos desalineados; BE-17 a BE-24 se probaron con datos QA creados por la API. Tras integrar los arreglos de base de datos (commit f1eccbb) la importación es completa: progress, history, roster y grade-sheet responden 200, y BE-17 se re-verificó con datos reales (Laura en el grupo ajeno 6abf0b8bfead57fb41c12c37 → 403).
 
 ## Base de datos
 
