@@ -32,6 +32,7 @@ Estados: corregido y verificado, corregido sin verificar, sospecha, pendiente.
 | BE-26 | notifications | Marcar como leída no cambia read | corregido y verificado | fix(BE-26) |
 | BE-27 | postman | Postman crea/edita docentes con campo department inexistente | corregido y verificado | fix(BE-27) |
 | BE-28 | notifications | Filtro read convierte cualquier texto en false | corregido y verificado | fix(BE-28) |
+| BE-29 | swagger/auth | Ejemplo de Swagger del login con clave inválida | corregido y verificado | fix(BE-29) |
 
 ## Backend
 
@@ -241,6 +242,13 @@ Estados: corregido y verificado, corregido sin verificar, sospecha, pendiente.
 - Solución: `@Transform(toBoolean)` de common/dto/query-helpers, como el resto de filtros booleanos.
 - Cómo demostrarlo: `GET /api/notifications/mine?read=abc` (juliana.herrera147) → antes 200 con total 5 (= read=false); después 400 `read must be a boolean value`. `read=true` (1) y `read=false` (5) siguen igual.
 - Commit: fix(BE-28)
+
+### BE-29 — Ejemplo de password en LoginDto no coincide con los usuarios de prueba
+- Dónde: src/auth/dto/login.dto.ts:9 (@ApiProperty example de password)
+- Problema: Swagger precarga `admin@universidad.edu` / `Admin12345`; según el README la clave de los usuarios de prueba es `Secret123!`, así que el "Try it out" del login en /api/docs siempre da 401.
+- Solución: `@ApiProperty({ example: 'Secret123!' })`.
+- Cómo demostrarlo: `POST /api/auth/login {admin@universidad.edu, Admin12345}` (ejemplo anterior) → 401 `Credenciales invalidas`. Después, `GET /api/docs-json` muestra `LoginDto.password.example = Secret123!` y ese cuerpo da 200.
+- Commit: fix(BE-29)
 
 ## Base de datos
 
